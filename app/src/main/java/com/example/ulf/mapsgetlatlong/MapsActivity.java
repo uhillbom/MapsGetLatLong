@@ -18,7 +18,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener, GoogleMap.OnMarkerDragListener, GoogleMap.OnMapClickListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     /**
@@ -27,6 +27,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
 
     private GoogleApiClient client;
+    private Marker myPos = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,20 +38,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
-
-
-    @Override
-    public void onMapLongClick(LatLng point) {
-        if (mMap != null) {
-            Log.i(point.toString(), "Use position long click");
-            mMap.addMarker(new MarkerOptions()
-                    .position(point)
-                    .title("You are here")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-                    .draggable(true));
-        }
-    }
-
 
     /**
      * Manipulates the map once available.
@@ -64,46 +51,53 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setOnMapLongClickListener(this);
-        mMap.setOnMarkerDragListener(this);
-        mMap.setOnMapClickListener(this);
+        //mMap.setOnMapLongClickListener(this);
+        //mMap.setOnMarkerDragListener(this);
+        //mMap.setOnMapClickListener(this);
         // Add a marker in Sydney and move the camera
         //LatLng sydney = new LatLng(-34, 151);
         //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker myPos) {
+
+            }
+
+            @Override
+            public void onMarkerDrag(Marker myPos) {
+
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker myPos) {
+
+            }
+        });
+
+        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng point) {
+                if (mMap != null) {
+                    if (myPos != null) {
+                        myPos.remove(); // Remove the old marker
+                        myPos = null; // Set the myPos marker to null
+                    }
+                    // If the marker myPos == null then add the marker
+                    if (myPos==null) {
+
+                        Log.i(point.toString(), "Use position long click");
+                        myPos = mMap.addMarker(new MarkerOptions()
+                                .position(point)
+                                .title("You are here")
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                                .draggable(true));
+                    }
+                }
+            }
+        });
     }
 
-    @Override
-    public void onMarkerDragStart(Marker marker) {
-        LatLng position=marker.getPosition();
-
-        Log.d(getClass().getSimpleName(), String.format("Drag from %f:%f",
-                position.latitude,
-                position.longitude));
-    }
-
-    @Override
-    public void onMarkerDrag(Marker marker) {
-        LatLng position=marker.getPosition();
-
-        Log.d(getClass().getSimpleName(),
-                String.format("Dragging to %f:%f", position.latitude,
-                        position.longitude));
-    }
-    @SuppressWarnings("unchecked")
-    @Override
-    public void onMarkerDragEnd(Marker marker) {
-        LatLng position=marker.getPosition();
-
-        Log.d(getClass().getSimpleName(), String.format("Dragged to %f:%f",
-                position.latitude,
-                position.longitude));
-    }
-
-    @Override
-    public void onMapClick(LatLng latLng) {
-       mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-    }
     /*
     @Override
     public void onStart() {
